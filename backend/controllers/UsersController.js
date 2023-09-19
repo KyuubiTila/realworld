@@ -17,7 +17,7 @@ const createUser = async (req, res) => {
     res.status(201).send(userData);
   } catch (error) {
     console.error('Error while creating user:', error);
-    return next(error);
+    res.status(500).send({ error: 'User creation failed' });
   }
 };
 
@@ -34,7 +34,45 @@ const getUser = async (req, res) => {
   }
 };
 
+// UPDATE USER
+const updateUser = async (req, res, next) => {
+  const { username, email, password } = req.body;
+
+  try {
+    const user = await Users.findOne({ where: { email: email } });
+
+    if (!user) {
+      throw new Error('Database error: User not found');
+    }
+
+    const checkPassword = await bcrypt.compare(password, user.password);
+
+    if (!checkPassword) {
+      throw new Error('Database error: Incorrect password');
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const updatedUser = await Users.update(
+      {
+        username: username,
+        email: email,
+        password: passwordHash,
+      },
+      { where: { email: email } }
+    );
+
+    res
+      .status(200)
+      .json({ message: 'User updated successfully', data: updatedUser });
+  } catch (error) {
+    console.error('Error while updating user:', error);
+    return next(error);
+  }
+};
+
 module.exports = {
   createUser,
   getUser,
+  updateUser,
 };

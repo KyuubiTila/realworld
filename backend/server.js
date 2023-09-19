@@ -3,6 +3,10 @@ const app = express();
 const cors = require('cors');
 const db = require('./models');
 const userRouter = require('./routes/UsersRoute');
+const {
+  globalErrorHandler,
+  notFoundHandler,
+} = require('./middleware/globalErrorHandler');
 
 app.use(express.json());
 
@@ -17,6 +21,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // ---------users route---------
 app.use('/api/user', userRouter);
+
+// Error Handling Middlewares
+app.use(notFoundHandler);
+
+app.use(globalErrorHandler);
 
 db.sequelize.sync().then(() => {
   app.listen(3001, () => {
