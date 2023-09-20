@@ -3,6 +3,8 @@ const Users = db.Users;
 
 const bcrypt = require('bcryptjs');
 
+const { sign } = require('jsonwebtoken');
+
 // CREATE USER
 const createUser = async (req, res) => {
   const { username, email, password } = req.body;
@@ -71,8 +73,46 @@ const updateUser = async (req, res, next) => {
   }
 };
 
+//LOGIN USER
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  try {
+    const findUser = await Users.findOne({ where: { email: email } });
+
+    if (!findUser) {
+      throw new Error('Database error: User not found');
+    } else {
+      const checkPassword = await bcrypt.compare(password, findUser.password);
+      if (checkPassword) {
+        const accessToken = sign(
+          {
+            email: findUser.email,
+            id: findUser.id,
+            username: findUser.username,
+          },
+          'realworldsecret',
+          { expiresIn: '30d' }
+        );
+        return res.json({
+          token: accessToken,
+          email: findUser.email,
+          id: findUser.id,
+          username: findUser.username,
+        });
+      } else {
+        throw new Error('Incorrect password');
+      }
+    }
+  } catch (error) {
+    console.error('Error during login:', error);
+    return next(error);
+  }
+};
+
 module.exports = {
   createUser,
   getUser,
   updateUser,
+  login,
 };
