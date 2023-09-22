@@ -1,15 +1,18 @@
+const { validateToken } = require('../middleware/AuthMiddleware');
 const {
   createUser,
   getUser,
-  updateUser,
+  updateUsername,
   login,
-} = require('../controllers/UsersController');
+  actualToken,
+} = require('../users/users.controller');
 
 const userRouter = require('express').Router();
 
 userRouter.post('/', createUser);
 userRouter.get('/:userId', getUser);
-userRouter.put('/', updateUser);
+userRouter.put('/', updateUsername);
 userRouter.post('/login', login);
+userRouter.get('/verify/authToken', validateToken, actualToken);
 
 module.exports = userRouter;

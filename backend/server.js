@@ -7,6 +7,7 @@ const {
   globalErrorHandler,
   notFoundHandler,
 } = require('./middleware/globalErrorHandler');
+require('dotenv').config();
 
 app.use(express.json());
 

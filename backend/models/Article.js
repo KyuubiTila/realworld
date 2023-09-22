@@ -16,10 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    favorited: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
+
     favoritesCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -34,6 +31,16 @@ module.exports = (sequelize, DataTypes) => {
     Article.belongsTo(models.Taglist, {
       foreignKey: 'tagList',
       as: 'Taglist',
+    });
+
+    Article.belongsTo(models.ArticleFavourite, {
+      foreignKey: 'favourited',
+      as: 'ArticleFavourite',
+    });
+
+    Article.hasOne(models.ArticleFavourite, {
+      onDelete: 'cascade',
+      foreignKey: 'articleId',
     });
   };
 
