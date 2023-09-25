@@ -1,4 +1,3 @@
-const { sign } = require('jsonwebtoken'); // be in its own service
 const {
   userRegisterSevice,
   getUserService,

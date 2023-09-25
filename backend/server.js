@@ -3,6 +3,8 @@ const app = express();
 const cors = require('cors');
 const db = require('./models');
 const userRouter = require('./routes/UsersRoute');
+const profileRouter = require('./routes/ProfileRoute');
+const articleRouter = require('./routes/ArticleRoute');
 const {
   globalErrorHandler,
   notFoundHandler,
@@ -22,6 +24,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // ---------users route---------
 app.use('/api/user', userRouter);
+
+// ---------profile route---------
+app.use('/api/profile', profileRouter);
+
+// ---------article route---------
+app.use('/api/articles', articleRouter);
 
 // Error Handling Middlewares
 app.use(notFoundHandler);

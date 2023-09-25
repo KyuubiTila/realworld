@@ -3,8 +3,11 @@ import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { LoginCard } from './LoginCard';
+import { useAuth } from '../../stores/auth';
 
 export const Login = () => {
+  const userDetails = useAuth((state) => state.userDetails);
+
   const navigate = useNavigate();
 
   const validationSchema = Yup.object().shape({
@@ -25,6 +28,7 @@ export const Login = () => {
       );
 
       localStorage.setItem('accessToken', loggedInUser.data.token);
+      userDetails();
       navigate('/');
     } catch (error) {
       console.error('Error logging in:', error);

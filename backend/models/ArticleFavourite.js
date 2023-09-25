@@ -6,12 +6,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'profileId',
       as: 'Profile',
     });
-
-    ArticleFavourite.hasOne(models.Article, {
-      onDelete: 'cascade',
-      foreignKey: 'favourited',
-    });
-
     ArticleFavourite.belongsTo(models.Article, {
       onDelete: 'cascade',
       foreignKey: 'articleId',

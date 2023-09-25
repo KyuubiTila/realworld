@@ -16,10 +16,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-
+    taglist: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     favoritesCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 0,
     },
   });
 
@@ -27,15 +31,6 @@ module.exports = (sequelize, DataTypes) => {
     Article.belongsTo(models.Profile, {
       foreignKey: 'author',
       as: 'Profile',
-    });
-    Article.belongsTo(models.Taglist, {
-      foreignKey: 'tagList',
-      as: 'Taglist',
-    });
-
-    Article.belongsTo(models.ArticleFavourite, {
-      foreignKey: 'favourited',
-      as: 'ArticleFavourite',
     });
 
     Article.hasOne(models.ArticleFavourite, {
