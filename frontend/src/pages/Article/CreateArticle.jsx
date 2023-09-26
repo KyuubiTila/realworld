@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import * as Yup from 'yup';
-import { ArticleCard } from './ArticleCard';
+import { CreateArticleCard } from './CreateArticleCard';
 
 export const CreateArticle = () => {
   const accessToken = localStorage.getItem('accessToken');
@@ -60,7 +60,7 @@ export const CreateArticle = () => {
 
   return (
     <>
-      <ArticleCard
+      <CreateArticleCard
         validationSchema={validationSchema}
         initialValues={initialValues}
         createArticle={createArticle}

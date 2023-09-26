@@ -11,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'author',
       as: 'Profile',
     });
+
+    Comment.belongsTo(models.Article, {
+      foreignKey: 'articleId',
+      as: 'Article',
+    });
   };
 
   return Comment;
