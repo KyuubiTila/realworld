@@ -162,10 +162,24 @@ const toggleUnlikeOnPostService = async ({ articleId, id }) => {
     }
   }
 };
+
+const allLikesService = async (id) => {
+  try {
+    const userLikes = await ArticleFavourite.findAll({
+      where: { profileId: id },
+    });
+
+    return userLikes;
+  } catch (error) {
+    console.error('Error fetching user likes:', error);
+    throw new Error('Error fetching user likes');
+  }
+};
 module.exports = {
   createArticleService,
   getAllArticlesService,
   getSingleArticleService,
   toggleLikeOnPostService,
   toggleUnlikeOnPostService,
+  allLikesService,
 };

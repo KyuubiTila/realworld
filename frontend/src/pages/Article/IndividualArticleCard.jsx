@@ -1,5 +1,5 @@
 import React from 'react';
-import { timeAgo } from '../../utils/Tiimeago';
+import { timeAgo } from '../../utils/Timeago';
 
 export const IndividualArticleCard = ({ singleArticle, username }) => {
   const { body, title, favoritesCount, description, updatedAt } = singleArticle;

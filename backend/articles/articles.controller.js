@@ -4,6 +4,7 @@ const {
   getSingleArticleService,
   toggleLikeOnPostService,
   toggleUnlikeOnPostService,
+  allLikesService,
 } = require('./articles.service');
 
 const createArticle = async (req, res, next) => {
@@ -86,10 +87,30 @@ const toggleUnlikesOfPost = async (req, res, next) => {
   }
 };
 
+// GET ALL ARTICLE FAVORITES FOR LOGGEDIN USER
+const allLikes = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+
+    // Find all article favorites for the logged-in user
+    const userLikes = await allLikesService(id);
+
+    // Send the user's likes as a response
+    res.json({
+      status: 'success',
+      data: userLikes,
+    });
+  } catch (error) {
+    console.error('Error fetching user likes:', error);
+    return next(error);
+  }
+};
+
 module.exports = {
   createArticle,
   getAllArticles,
   getSingleArticle,
   toggleLikesOfPost,
   toggleUnlikesOfPost,
+  allLikes,
 };
