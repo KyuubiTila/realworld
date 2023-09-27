@@ -2,6 +2,7 @@ const db = require('../models');
 const Article = db.Article;
 const Users = db.Users;
 const Profile = db.Profile;
+const ArticleFavourite = db.ArticleFavourite;
 
 const createArticleService = async (data, userId) => {
   const { slug, title, description, body, taglist } = data;
@@ -77,8 +78,94 @@ const getSingleArticleService = async (articleId) => {
   }
 };
 
+const toggleLikeOnPostService = async ({ articleId, id }) => {
+  const userId = id;
+  try {
+    const post = await Article.findOne({ where: { id: articleId } });
+
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    const isLiked = await ArticleFavourite.findOne({
+      where: {
+        profileId: userId,
+        articleId: articleId,
+      },
+    });
+
+    if (isLiked) {
+      throw new Error('Post is liked');
+    }
+
+    if (!isLiked) {
+      // Add user's like
+
+      await ArticleFavourite.create({
+        articleId,
+        profileId: userId,
+      });
+    }
+
+    await post.reload();
+
+    return post;
+  } catch (error) {
+    if (error.message === 'Post not found') {
+      throw new Error('Post not found');
+    } else if (error.message === 'Post is liked') {
+      throw new Error('Post is liked');
+    } else {
+      throw new Error('Error toggling like on post');
+    }
+  }
+};
+
+const toggleUnlikeOnPostService = async ({ articleId, id }) => {
+  const userId = id;
+  try {
+    const post = await Article.findOne({ where: { id: articleId } });
+
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    const isLiked = await ArticleFavourite.findOne({
+      where: {
+        profileId: userId,
+        articleId: articleId,
+      },
+    });
+
+    if (!isLiked) {
+      throw new Error('Post is not liked');
+    }
+
+    if (isLiked) {
+      // Remove user's like
+
+      await ArticleFavourite.destroy({
+        where: { articleId, profileId: userId },
+      });
+    }
+
+    await post.reload();
+
+    return post;
+  } catch (error) {
+    if (error.message === 'Post not found') {
+      throw new Error('Post not found');
+    } else if (error.message === 'Post is not liked') {
+      throw new Error('Post is not liked');
+    } else {
+      throw new Error('Error toggling like on post');
+    }
+  }
+};
 module.exports = {
   createArticleService,
   getAllArticlesService,
   getSingleArticleService,
+  toggleLikeOnPostService,
+  toggleUnlikeOnPostService,
 };

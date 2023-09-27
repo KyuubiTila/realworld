@@ -2,9 +2,11 @@ const {
   createArticleService,
   getAllArticlesService,
   getSingleArticleService,
+  toggleLikeOnPostService,
+  toggleUnlikeOnPostService,
 } = require('./articles.service');
 
-const createArticle = async (req, res) => {
+const createArticle = async (req, res, next) => {
   const data = req.body;
   const userId = req.user.id;
 
@@ -17,13 +19,11 @@ const createArticle = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating article:', error);
-    res.status(500).json({
-      error: 'Article creation failed',
-    });
+    return next(error);
   }
 };
 
-const getAllArticles = async (req, res) => {
+const getAllArticles = async (req, res, next) => {
   try {
     const articles = await getAllArticlesService();
     res.status(201).json({
@@ -32,13 +32,11 @@ const getAllArticles = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      error: 'Error fetching articles.',
-    });
+    return next(error);
   }
 };
 
-const getSingleArticle = async (req, res) => {
+const getSingleArticle = async (req, res, next) => {
   const { articleId } = req.params;
   try {
     const articles = await getSingleArticleService(articleId);
@@ -48,10 +46,50 @@ const getSingleArticle = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      error: 'Error fetching articles.',
-    });
+    return next(error);
   }
 };
 
-module.exports = { createArticle, getAllArticles, getSingleArticle };
+// TOGGLE LIKE
+const toggleLikesOfPost = async (req, res, next) => {
+  try {
+    const { articleId } = req.params;
+    const { id } = req.user;
+
+    const post = await toggleLikeOnPostService({ articleId, id });
+
+    res.json({
+      status: 'success',
+      data: post,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(error);
+  }
+};
+
+// TOGGLE UNLIKE
+const toggleUnlikesOfPost = async (req, res, next) => {
+  try {
+    const { articleId } = req.params;
+    const { id } = req.user;
+
+    const post = await toggleUnlikeOnPostService({ articleId, id });
+
+    res.json({
+      status: 'success',
+      data: post,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(error);
+  }
+};
+
+module.exports = {
+  createArticle,
+  getAllArticles,
+  getSingleArticle,
+  toggleLikesOfPost,
+  toggleUnlikesOfPost,
+};
