@@ -1,3 +1,4 @@
+const sequelize = require('sequelize');
 const db = require('../models');
 const Article = db.Article;
 const Users = db.Users;
@@ -175,6 +176,24 @@ const allLikesService = async (id) => {
     throw new Error('Error fetching user likes');
   }
 };
+
+const updateArticleFavoritesCountService = async (articleId) => {
+  try {
+    const count = await ArticleFavourite.count({ where: { articleId } });
+    await Article.update(
+      { favoritesCount: count },
+      { where: { id: articleId } }
+    );
+    return {
+      success: true,
+      message: 'Article favorite count updated successfully',
+    };
+  } catch (error) {
+    console.error('Error updating article favorite count:', error);
+    throw new Error('Error updating article favorite count');
+  }
+};
+
 module.exports = {
   createArticleService,
   getAllArticlesService,
@@ -182,4 +201,5 @@ module.exports = {
   toggleLikeOnPostService,
   toggleUnlikeOnPostService,
   allLikesService,
+  updateArticleFavoritesCountService,
 };

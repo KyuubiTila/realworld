@@ -3,6 +3,7 @@ import { timeAgo } from '../../utils/Timeago';
 import { useAuth } from '../../stores/auth';
 import { Link } from 'react-router-dom';
 import { useArticle } from '../../stores/articles';
+
 export const ArticleDisplayCard = ({ article }) => {
   const loggedIn = useAuth((state) => state.loggedIn);
   const toggleLike = useArticle((state) => state.toggleLike);
@@ -10,26 +11,32 @@ export const ArticleDisplayCard = ({ article }) => {
   const getAllLiked = useArticle((state) => state.getAllLiked);
   const allLiked = useArticle((state) => state.allLiked);
 
-  const [liked, setLiked] = useState(false);
-  const { id, body, title, favoritesCount, description, updatedAt } = article;
+  const [liked, setLiked] = useState(allLiked.includes(article.id));
+
+  const { id, body, title, favoritesCount, description, createdAt } = article;
   const { username } = article.Profile.User;
 
-  const timeAgoString = timeAgo(new Date(updatedAt));
+  const timeAgoString = timeAgo(new Date(createdAt));
 
   const handleLikeClick = async (id) => {
     const articleId = id;
     try {
+      let updatedFavoritesCount = favoritesCount;
       // Send a request to your server to toggle the like status
       if (liked) {
         // User has already liked, send an unlike request
         await toggleUnlike(articleId);
+        updatedFavoritesCount--;
       } else {
         // User has not liked, send a like request
         await toggleLike(articleId);
+        updatedFavoritesCount++;
       }
 
       // Toggle the 'liked' state based on the server response
       setLiked(!liked);
+      // Update the article object with the new favoritesCount
+      article.favoritesCount = updatedFavoritesCount;
     } catch (error) {
       console.error('Error toggling like:', error);
     }
@@ -38,13 +45,6 @@ export const ArticleDisplayCard = ({ article }) => {
   useEffect(() => {
     loggedIn && getAllLiked();
   }, [getAllLiked, loggedIn]);
-
-  // Check if the article's ID is in the allLiked array and set liked state accordingly
-  useEffect(() => {
-    if (allLiked.includes(id)) {
-      setLiked(true);
-    }
-  }, [allLiked, id]);
 
   return (
     <div className="bg-slate-800 text-white rounded-lg mt-4 space-y-6 p-10 w-full">
@@ -131,7 +131,7 @@ export const ArticleDisplayCard = ({ article }) => {
               )}
             </button>
             <span className="ml-1 text-slate-400 text-sm">
-              Likes : {liked ? favoritesCount + 1 : favoritesCount}
+              Likes : {favoritesCount}
             </span>
           </div>
         ) : (

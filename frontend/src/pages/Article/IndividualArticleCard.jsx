@@ -1,10 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { timeAgo } from '../../utils/Timeago';
+import { useAuth } from '../../stores/auth';
+import { useArticle } from '../../stores/articles';
 
 export const IndividualArticleCard = ({ singleArticle, username }) => {
-  const { body, title, favoritesCount, description, updatedAt } = singleArticle;
+  const loggedIn = useAuth((state) => state.loggedIn);
+  const toggleLike = useArticle((state) => state.toggleLike);
+  const toggleUnlike = useArticle((state) => state.toggleUnlike);
+  const getAllLiked = useArticle((state) => state.getAllLiked);
+  const allLiked = useArticle((state) => state.allLiked);
+
+  const [liked, setLiked] = useState(allLiked.includes(singleArticle.id));
+
+  const { id, body, title, favoritesCount, description, updatedAt } =
+    singleArticle;
 
   const timeAgoString = timeAgo(new Date(updatedAt));
+
+  const handleLikeClick = async (id) => {
+    const articleId = id;
+    try {
+      let updatedFavoritesCount = favoritesCount;
+      // Send a request to your server to toggle the like status
+      if (liked) {
+        // User has already liked, send an unlike request
+        await toggleUnlike(articleId);
+        updatedFavoritesCount--;
+      } else {
+        // User has not liked, send a like request
+        await toggleLike(articleId);
+        updatedFavoritesCount++;
+      }
+
+      // Toggle the 'liked' state based on the server response
+      setLiked(!liked);
+      // Update the article object with the new favoritesCount
+      singleArticle.favoritesCount = updatedFavoritesCount;
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  useEffect(() => {
+    loggedIn && getAllLiked();
+  }, [getAllLiked, loggedIn]);
+
+  useEffect(() => {
+    // Update 'liked' state when 'allLiked' prop changes
+    setLiked(allLiked.includes(singleArticle.id));
+  }, [allLiked, singleArticle.id]);
+
   return (
     <div className="bg-slate-400 text-white rounded-lg mt-4 space-y-6 p-10 w-full">
       <div className="flex space-x-4 items-center  ">
@@ -49,22 +94,48 @@ export const IndividualArticleCard = ({ singleArticle, username }) => {
       </div>
 
       <div className="flex justify-between pt-5">
-        <div className="flex items-center">
-          <svg
-            className="h-4 w-4 text-red-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
-            />
-          </svg>
-          <span className="ml-1 text-base ">{favoritesCount}</span>
-        </div>
+        {loggedIn ? (
+          <div className="flex items-center">
+            <button onClick={() => handleLikeClick(id)}>
+              {liked ? (
+                <svg
+                  className="h-4 w-4 text-red-500"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke="none"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-4 w-4 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
+                  />
+                </svg>
+              )}
+            </button>
+            <span className="ml-1 text-base text-sm">
+              Likes : {favoritesCount}
+            </span>
+          </div>
+        ) : (
+          <span className="ml-1 text-base text-sm">
+            Likes : {favoritesCount}
+          </span>
+        )}
         <div className="text-base">
           <p>23 Comments</p>
         </div>

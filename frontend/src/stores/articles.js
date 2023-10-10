@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
+import { updateFavouritedCount } from '../utils/update';
 export const useArticle = create(
   persist(
     (set) => ({
@@ -66,6 +66,8 @@ export const useArticle = create(
               : [...state.allLiked, articleId],
           }));
 
+          await updateFavouritedCount(articleId);
+
           // You can also update other relevant state based on the response.
         } catch (error) {
           console.error('Error fetching article:', error);
@@ -98,6 +100,8 @@ export const useArticle = create(
               ? state.allLiked.filter((likedId) => likedId !== articleId)
               : [...state.allLiked, articleId],
           }));
+
+          await updateFavouritedCount(articleId);
 
           // You can also update other relevant state based on the response.
         } catch (error) {

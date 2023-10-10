@@ -5,6 +5,7 @@ const {
   toggleLikeOnPostService,
   toggleUnlikeOnPostService,
   allLikesService,
+  updateArticleFavoritesCountService,
 } = require('./articles.service');
 
 const createArticle = async (req, res, next) => {
@@ -106,6 +107,19 @@ const allLikes = async (req, res, next) => {
   }
 };
 
+// UPDATE FAVORITES COUUNTS TABLE
+const updateArticleFavoritesCount = async (req, res, next) => {
+  const { articleId } = req.params;
+  try {
+    const result = await updateArticleFavoritesCountService(articleId);
+
+    return res.status(200).json({ result });
+  } catch (error) {
+    console.error('Controller Error:', error);
+    return next(error);
+  }
+};
+
 module.exports = {
   createArticle,
   getAllArticles,
@@ -113,4 +127,5 @@ module.exports = {
   toggleLikesOfPost,
   toggleUnlikesOfPost,
   allLikes,
+  updateArticleFavoritesCount,
 };
