@@ -5,7 +5,10 @@ import { persist } from 'zustand/middleware';
 export const useAuth = create(
   persist(
     (set) => ({
-      user: [],
+      user: {
+        id: null,
+        username: null,
+      },
       loggedIn: false,
 
       userDetails: async () => {
@@ -25,9 +28,9 @@ export const useAuth = create(
             }
           );
 
-          console.log(details);
+          const { id, username } = details.data;
 
-          set({ user: details.data.username });
+          set({ user: { id, username } });
           set({ loggedIn: true });
         } catch (error) {
           console.error('Error logging in:', error);
@@ -35,7 +38,7 @@ export const useAuth = create(
       },
 
       logOut: () => {
-        set({ user: [] });
+        set({ user: { id: null, username: null } });
         set({ loggedIn: false });
       },
     }),

@@ -3,6 +3,7 @@ import { timeAgo } from '../../utils/Timeago';
 import { useAuth } from '../../stores/auth';
 import { Link } from 'react-router-dom';
 import { useArticle } from '../../stores/articles';
+import { useComment } from '../../stores/comments';
 
 export const ArticleDisplayCard = ({ article }) => {
   const loggedIn = useAuth((state) => state.loggedIn);
@@ -10,10 +11,21 @@ export const ArticleDisplayCard = ({ article }) => {
   const toggleUnlike = useArticle((state) => state.toggleUnlike);
   const getAllLiked = useArticle((state) => state.getAllLiked);
   const allLiked = useArticle((state) => state.allLiked);
+  const allComments = useComment((state) => state.allComments);
+  const comments = useComment((state) => state.comments);
+
+  const personalCommentsId = comments.map((comment) => {
+    return comment.articleId;
+  });
 
   const [liked, setLiked] = useState(allLiked.includes(article.id));
 
   const { id, body, title, favoritesCount, description, createdAt } = article;
+
+  const commentsLength = personalCommentsId.filter(
+    (commentId) => commentId === id
+  ).length;
+
   const { username } = article.Profile.User;
 
   const timeAgoString = timeAgo(new Date(createdAt));
@@ -45,6 +57,10 @@ export const ArticleDisplayCard = ({ article }) => {
   useEffect(() => {
     loggedIn && getAllLiked();
   }, [getAllLiked, loggedIn]);
+
+  useEffect(() => {
+    allComments();
+  }, [allComments, id]);
 
   return (
     <div className="bg-slate-800 text-white rounded-lg mt-4 space-y-6 p-10 w-full">
@@ -141,7 +157,7 @@ export const ArticleDisplayCard = ({ article }) => {
         )}
 
         <div className="text-slate-400 text-sm">
-          <p>23 Comments</p>
+          <p>{commentsLength} Comments</p>
         </div>
       </div>
     </div>

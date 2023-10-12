@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { timeAgo } from '../../utils/Timeago';
 import { useAuth } from '../../stores/auth';
 import { useArticle } from '../../stores/articles';
+import { useComment } from '../../stores/comments';
+import CreateCommentCard from '../Comment/CreateCommentCard';
+import * as Yup from 'yup';
+import axios from 'axios';
+import { CommentCard } from '../Comment/displayCommentsCard';
 
 export const IndividualArticleCard = ({ singleArticle, username }) => {
   const loggedIn = useAuth((state) => state.loggedIn);
@@ -9,13 +14,52 @@ export const IndividualArticleCard = ({ singleArticle, username }) => {
   const toggleUnlike = useArticle((state) => state.toggleUnlike);
   const getAllLiked = useArticle((state) => state.getAllLiked);
   const allLiked = useArticle((state) => state.allLiked);
-
+  const articleComments = useComment((state) => state.articleComments);
+  const comments = useComment((state) => state.comments);
+  const addComment = useComment((state) => state.addComment);
+  const commentDelete = useComment((state) => state.commentDelete);
   const [liked, setLiked] = useState(allLiked.includes(singleArticle.id));
 
   const { id, body, title, favoritesCount, description, updatedAt } =
     singleArticle;
 
   const timeAgoString = timeAgo(new Date(updatedAt));
+
+  const initialValues = {
+    comment: '',
+  };
+  const validationSchema = Yup.object().shape({
+    comment: Yup.string().required('you must send a comment'),
+  });
+
+  const addCommentHandler = async (data) => {
+    const accessToken = localStorage.getItem('accessToken');
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3001/api/comments/${id}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response && response.data) {
+        const newComment = response.data.data;
+
+        console.log(newComment);
+        addComment(newComment);
+      } else {
+        alert(
+          'Failed to create a comment. The response does not contain valid data.'
+        );
+      }
+    } catch (error) {
+      alert(`Error creating a comment: ${error.message}`);
+    }
+  };
 
   const handleLikeClick = async (id) => {
     const articleId = id;
@@ -50,6 +94,10 @@ export const IndividualArticleCard = ({ singleArticle, username }) => {
     setLiked(allLiked.includes(singleArticle.id));
   }, [allLiked, singleArticle.id]);
 
+  useEffect(() => {
+    articleComments(id);
+  }, [articleComments, id]);
+
   return (
     <div className="bg-slate-400 text-white rounded-lg mt-4 space-y-6 p-10 w-full">
       <div className="flex space-x-4 items-center  ">
@@ -82,7 +130,6 @@ export const IndividualArticleCard = ({ singleArticle, username }) => {
           <p className=" text-xs text-slate-400">{timeAgoString}</p>
         </div>
       </div>
-
       <div>
         <p className="text-base">{title}</p>
       </div>
@@ -92,7 +139,6 @@ export const IndividualArticleCard = ({ singleArticle, username }) => {
       <div>
         <p className="text-sm leading-6 text-slate-300">{body}</p>
       </div>
-
       <div className="flex justify-between pt-5">
         {loggedIn ? (
           <div className="flex items-center">
@@ -127,19 +173,31 @@ export const IndividualArticleCard = ({ singleArticle, username }) => {
                 </svg>
               )}
             </button>
-            <span className="ml-1 text-base text-sm">
-              Likes : {favoritesCount}
-            </span>
+            <span className="ml-1 text-base">Likes : {favoritesCount}</span>
           </div>
         ) : (
-          <span className="ml-1 text-base text-sm">
-            Likes : {favoritesCount}
-          </span>
+          <span className="ml-1 text-base">Likes : {favoritesCount}</span>
         )}
         <div className="text-base">
-          <p>23 Comments</p>
+          <p>{comments.length} Comments</p>
         </div>
       </div>
+      {comments.map((comment) => {
+        return (
+          <CommentCard
+            key={comment.id}
+            comment={comment}
+            commentDelete={commentDelete}
+          />
+        );
+      })}
+      {loggedIn && (
+        <CreateCommentCard
+          addCommentHandler={addCommentHandler}
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+        />
+      )}
     </div>
   );
 };

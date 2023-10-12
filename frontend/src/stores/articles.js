@@ -123,8 +123,6 @@ export const useArticle = create(
 
           const { data } = allLiked;
 
-          console.log(data);
-
           set({ allLiked: data.data.map((item) => item.articleId) });
         } catch (error) {
           console.error('Error fetching all Liked:', error);

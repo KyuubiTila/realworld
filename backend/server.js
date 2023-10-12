@@ -5,6 +5,7 @@ const db = require('./models');
 const userRouter = require('./routes/UsersRoute');
 const profileRouter = require('./routes/ProfileRoute');
 const articleRouter = require('./routes/ArticleRoute');
+const commentRouter = require('./routes/CommentRoute');
 const {
   globalErrorHandler,
   notFoundHandler,
@@ -30,6 +31,9 @@ app.use('/api/profile', profileRouter);
 
 // ---------article route---------
 app.use('/api/articles', articleRouter);
+
+// ---------comment route---------
+app.use('/api/comments', commentRouter);
 
 // Error Handling Middlewares
 app.use(notFoundHandler);
